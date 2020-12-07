@@ -13,6 +13,8 @@ import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+
 @Entity
 @Table(name = "likes")
 public class Like {
@@ -28,6 +30,7 @@ public class Like {
 	@JoinColumn(name = "user_id")
 	private User user;
 	
+	@JsonBackReference
 	@OneToOne
 	@JoinColumn(name = "tweet_id")
 	private Tweet tweet;

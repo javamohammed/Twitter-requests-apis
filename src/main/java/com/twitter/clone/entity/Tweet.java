@@ -1,5 +1,6 @@
 package com.twitter.clone.entity;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -7,6 +8,7 @@ import java.util.List;
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
+import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
@@ -18,10 +20,11 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 
 @Entity
 @Table(name = "tweets")
-public class Tweet {
+public class Tweet  implements Serializable{
 
 	//`id`, `tweet_text`, `geo_lat`, `geo_long`, `user_id`, `created_at`, `updated_at`
 	@Id
@@ -44,14 +47,16 @@ public class Tweet {
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "created_at")
-	private Date created_at;
+	private Date createdAt;
 	
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "updated_at")
 	private Date updated_at;
 	
-	@JsonBackReference
+	//@JsonBackReference
+	//@JsonManagedReference
 	 @OneToMany(
+			 fetch = FetchType.LAZY,
         cascade = CascadeType.ALL,
         orphanRemoval = true
     )
@@ -60,6 +65,10 @@ public class Tweet {
 	
 	public Tweet() {
 		// TODO Auto-generated constructor stub
+	}
+	
+	public int getCountLikes() {
+		return likes.size();
 	}
 
 	public int getId() {
@@ -103,11 +112,11 @@ public class Tweet {
 	}
 	
 	public String getCreated_at() {
-		return timeTostring(created_at);
+		return timeTostring(createdAt);
 	}
 
 	public void setCreated_at(Date created_at) {
-		this.created_at = created_at;
+		this.createdAt = created_at;
 	}
 
 	public String getUpdated_at() {

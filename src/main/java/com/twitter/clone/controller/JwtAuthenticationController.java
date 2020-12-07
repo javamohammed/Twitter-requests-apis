@@ -1,6 +1,10 @@
 package com.twitter.clone.controller;
 
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -14,6 +18,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
+import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.twitter.clone.config.CustomAuthenticationProvider;
@@ -58,26 +63,31 @@ public class JwtAuthenticationController {
 			
 			
 		final String token = jwtTokenUtil.generateToken(userDetails);
-		return ResponseEntity.ok(new JwtResponse(token));
+		User userSearch = userServiceImpl.findByEmail(username);
+		userSearch.setPassword("");
+		return ResponseEntity.ok(new JwtResponse(token, userSearch));
 	}
+	
+	
 	@PostMapping("/api/signin")
-	public ResponseEntity<?> signinAndCreateAuthenticationToken(@RequestBody User user) throws Exception{
+	public  ResponseEntity<?> signinAndCreateAuthenticationToken(@RequestBody User user) throws Exception{
 		
 		User userSearch = userServiceImpl.findByEmail(user.getEmail());
 		
 		if(userSearch != null) {
-			return ResponseEntity.ok(new JwtResponse("This Email already exists !!")); 
+			return new ResponseEntity<>(new JwtResponse("This Email already exists !!",null), HttpStatus.BAD_REQUEST); 
 		}
 		if(user.getName() == "" || user.getName() == null) {
-			return ResponseEntity.ok(new JwtResponse("Please enter your name!!")); 
+			return new ResponseEntity<>(new JwtResponse("Please enter your name !!",null), HttpStatus.BAD_REQUEST); 
 		}
 		String hashedPassword = passwordEncoder.encode(user.getPassword());
 		user.setPassword(hashedPassword);
 		userServiceImpl.save(user);
-		
+		//TimeUnit.SECONDS.sleep(5);
 		final UserDetails userDetails = userDetailsService.loadUserByUsername(user.getEmail()); 
 		final String token = jwtTokenUtil.generateToken(userDetails);
-		return ResponseEntity.ok(new JwtResponse(token));
+		
+		return ResponseEntity.ok(new JwtResponse(token, null)); 
 	}
 	
 	private Authentication authenticate(String username, String password) throws Exception {

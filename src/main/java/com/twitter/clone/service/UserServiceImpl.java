@@ -17,7 +17,11 @@ public class UserServiceImpl  {
 		return userRepository.findByEmail(email);
 	}
 	
-	public void save(User user) {
-		userRepository.save(user);
+	public User findById(int id) {
+		return userRepository.findById(id).orElse(null);
+	}
+	
+	public User save(User user) {
+		return userRepository.saveAndFlush(user);
 	}
 }
